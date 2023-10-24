@@ -1,0 +1,15 @@
+# 建立 nginx web service 做 http 負載平衡
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-web-service
+spec:
+  selector:
+    app: web-nginx
+  ports:
+    - port: 80
+      targetPort: 80
+  type: LoadBalancer
+  # 更換為自己的靜態 IP，需使用 region 區域型的靜態 IP
+  loadBalancerIP: "x.x.x.x"
+  externalTrafficPolicy: Local

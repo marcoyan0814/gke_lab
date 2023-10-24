@@ -1,0 +1,11 @@
+# 使用Google建立憑證(最慢約需60分鐘)
+# 查詢憑證指令 kubectl describe managedcertificate managed-cert
+# 列出憑證 gcloud beta compute ssl-certificates list
+apiVersion: networking.gke.io/v1
+kind: ManagedCertificate
+metadata:
+  name: managed-cert
+spec:
+  domains:
+    - frontend.abc.com
+    - backend.abc.com

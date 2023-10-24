@@ -1,0 +1,57 @@
+# 使用 Ingress 來實現路徑分流
+# https://cloud.google.com/kubernetes-engine/docs/concepts/ingress-xlb?hl=zh-cn
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: nginx-web-ingress
+  annotations:
+    # 使用 GCE Ingress
+    kubernetes.io/ingress.class: gce
+    # global 的 GCE IP
+    kubernetes.io/ingress.global-static-ip-name: gke-web-ip
+    # 使用 Google 建立的憑證
+    networking.gke.io/managed-certificates: managed-cert
+    service.beta.kubernetes.io/external-traffic: OnlyLocal
+spec:
+  # 以下範例為兩種方式實現，1為路徑，2為FQDN
+  rules:
+    # 方法1，適合api版本，例如 /v2/* /v3/* 等，但在nginx設定內，URL路徑也要相同
+    - http:
+        paths:
+          - path: /frontend/*
+            # path 比對方式
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: nginx-web-frontend-service
+                port:
+                  # 此為對應到service的port
+                  number: 80
+          - path: /backend/*
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: nginx-web-backend-service
+                port:
+                  number: 80
+    # 方法2，適合不同的 FQDN (此方法若要使用，不能走CDN，需要自掛憑證，如果想走CDN可以用Service或是另外再建Ingress)
+    - host: "frontend.abc.com"
+      http:
+        paths:
+          - pathType: Prefix
+            path: /
+            backend:
+              service:
+                name: nginx-web-frontend-service
+                port:
+                  number: 80
+    - host: "backend.abc.com"
+      http:
+        paths:
+          - pathType: Prefix
+            path: /
+            backend:
+              service:
+                name: nginx-web-backend-service
+                port:
+                  number: 80

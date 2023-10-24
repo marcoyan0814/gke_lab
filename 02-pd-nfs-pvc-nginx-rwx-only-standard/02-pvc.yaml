@@ -1,0 +1,26 @@
+# 從 NFS Server 切 1G 出來做為 PV及PVC 供其它 pod 使用
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: nfs-pv1
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteMany
+  nfs:
+    server: nfs-server.default.svc.cluster.local
+    path: "/"
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: nfs-pvc1
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: ""
+  resources:
+    requests:
+      storage: 1Gi
+  volumeName: nfs-pv1
